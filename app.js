@@ -1,4 +1,6 @@
 var CAMPAIGN_GOAL = 1000;
+var BALANCED_MARKETPLACE_URI = "/v1/marketplaces/TEST-MP1nb4ggHRSZdTrNOoJZpuLJ";
+var BALANCED_API_KEY = "2d0a61deeff511e29f6c026ba7cd33d0";
 
 var express = require('express');
 var app = express();
