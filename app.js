@@ -1,4 +1,5 @@
 var CAMPAIGN_GOAL = 1000;
+var MONGO_URI = "mongodb://localhost:27017/test";
 var BALANCED_MARKETPLACE_URI = "/v1/marketplaces/TEST-MP1nb4ggHRSZdTrNOoJZpuLJ";
 var BALANCED_API_KEY = "2d0a61deeff511e29f6c026ba7cd33d0";
 
@@ -32,8 +33,14 @@ app.post("/pay/balanced",function(request,response){
     var amount = request.body.amount;
     var name = request.body.name;
 
-    // TODO: Charge card using Balanced API
-    /*response.send("Your card URI is: "+request.body.card_uri);*/
+
+    // TODO: Actually log the donation with MongoDB
+    /*return Q.fcall(function(){
+        return donation;
+    });*/
+
+    // Record donation to database
+    return _recordDonation(donation);
 
     Q.fcall(function(){
 
@@ -111,6 +118,31 @@ function _callBalanced(url,params){
         // Successful Requests
         deferred.resolve(body);
 
+    });
+    return deferred.promise;
+
+}
+
+// Recording a Donation
+var mongo = require('mongodb').MongoClient;
+function _recordDonation(donation){
+
+    // Promise saving to database
+    var deferred = Q.defer();
+    mongo.connect(MONGO_URI,function(err,db){
+        if(err){ return deferred.reject(err); }
+
+        // Insert donation
+        db.collection('donations').insert(donation,function(err){
+            if(err){ return deferred.reject(err); }
+
+            // Promise the donation you just saved
+            deferred.resolve(donation);
+
+            // Close database
+            db.close();
+
+        });
     });
     return deferred.promise;
 
