@@ -33,14 +33,8 @@ app.post("/pay/balanced",function(request,response){
     var amount = request.body.amount;
     var name = request.body.name;
 
-
-    // TODO: Actually log the donation with MongoDB
-    /*return Q.fcall(function(){
-        return donation;
-    });*/
-
-    // Record donation to database
-    return _recordDonation(donation);
+    // TODO: Charge card using Balanced API
+    /*response.send("Your card URI is: "+request.body.card_uri);*/
 
     Q.fcall(function(){
 
@@ -66,10 +60,8 @@ app.post("/pay/balanced",function(request,response){
             transaction: transaction
         };
 
-        // TODO: Actually record the transaction in the database
-        return Q.fcall(function(){
-            return donation;
-        });
+        // Record donation to database
+        return _recordDonation(donation);
 
     }).then(function(donation){
 
@@ -138,6 +130,35 @@ function _recordDonation(donation){
 
             // Promise the donation you just saved
             deferred.resolve(donation);
+
+            // Close database
+            db.close();
+
+        });
+    });
+    return deferred.promise;
+
+}
+
+// Get total donation funds
+function _getTotalFunds(){
+
+    // Promise the result from database
+    var deferred = Q.defer();
+    mongo.connect(MONGO_URI,function(err,db){
+        if(err){ return deferred.reject(err); }
+
+        // Get amounts of all donations
+        db.collection('donations')
+        .find( {}, {amount:1} ) // Select all, only return "amount" field
+        .toArray(function(err,donations){
+            if(err){ return deferred.reject(err); }
+
+            // Sum up total amount, and resolve promise.
+            var total = donations.reduce(function(previousValue,currentValue){
+                return previousValue + currentValue.amount;
+            },0);
+            deferred.resolve(total);
 
             // Close database
             db.close();
