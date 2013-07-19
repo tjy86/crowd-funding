@@ -10,14 +10,25 @@ app.use(express.bodyParser());
 app.listen(1337);
 console.log("App running on http://localhost:1337");
 
+// Serve homepage
 app.get("/",function(request,response){
 
-    response.send(
+    // TODO: Actually get fundraising total
+    /*response.send(
         "<link rel='stylesheet' type='text/css' href='/static/fancy.css'>"+
         "<h1>Your Crowdfunding Campaign</h1>"+
         "<h2>raised ??? out of $"+CAMPAIGN_GOAL.toFixed(2)+"</h2>"+
-        "<a href='/fund'> Fund This</a>"
+        "<a href='/fund'>Fund This</a>"
+    );*/
+
+    Q.fcall(_getTotalFunds).then(function(total){
+        response.send(
+            "<link rel='stylesheet' type='text/css' href='/static/fancy.css'>"+
+            "<h1>Your Crowdfunding Campaign</h1>"+
+            "<h2>raised $"+total.toFixed(2)+" out of $"+CAMPAIGN_GOAL.toFixed(2)+"</h2>"+
+            "<a href='/fund'>Fund This</a>"
         );
+    });
 
 });
 
