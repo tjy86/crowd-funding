@@ -24,6 +24,7 @@ app.get("/fund",function(request,response){
     response.sendfile("fund.html");
 });
 
+// Pay via Balanced
 app.post("/pay/balanced",function(request,response){
 
     // Payment Data
@@ -82,26 +83,35 @@ app.post("/pay/balanced",function(request,response){
 
 });
 
+// Calling the Balanced REST API
 var Q = require('q');
 var httpRequest = require('request');
-function _callBalanced (url,params) {
+function _callBalanced(url,params){
+
+    // Promise an HTTP POST Request
     var deferred = Q.defer();
     httpRequest.post({
+
         url: "https://api.balancedpayments.com"+BALANCED_MARKETPLACE_URI+url,
         auth: {
             user: BALANCED_API_KEY,
             pass: "",
             sendImmediately: true
-        };
+        },
         json: params
-    } function(error,response,body) {
 
+    }, function(error,response,body){
+
+        // Handle all Bad Requests (Error 4XX) or Internal Server Errors (Error 5XX)
         if(body.status_code>=400){
             deferred.reject(body.description);
             return;
         }
 
+        // Successful Requests
         deferred.resolve(body);
+
     });
+    return deferred.promise;
 
 }
